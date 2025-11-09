@@ -46,3 +46,8 @@ bool MyClass::Count()
     ++counter_;
     return true;
 }
+
+int MyClass::GetCounter()
+{
+    return counter_;
+}

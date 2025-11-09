@@ -13,6 +13,8 @@ public:
 
     bool Count();
 
+    int GetCounter();
+
 private:
     char* string_;
     size_t stringSize_;
