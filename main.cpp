@@ -13,6 +13,7 @@ MyClass someData;
 std::mutex mtx; 
 std::condition_variable cv;
 std::atomic<bool> isFinishing = false;
+std::atomic<bool> isProvided = false;
 
 void signalHandler(int signal)
 {
@@ -22,26 +23,36 @@ void signalHandler(int signal)
 
 void provider()
 {
-    std::lock_guard<decltype(mtx)> lock(mtx);
-    
-    while(!isFinishing.load())
+    while (!isFinishing.load())
     {
-        std::cout << "Provider is waiting\n";
+        {
+            std::lock_guard<decltype(mtx)> lock(mtx);
+
+            std::cout << "[PROVIDER] Is providing...\n";
+            isProvided.store(true);
+        }
+        cv.notify_all();
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
+    std::cout << "[PROVIDER] Stopping...\n";
     cv.notify_all();
 }
 
 void consumer()
 {
-    std::unique_lock<std::mutex> lock(mtx);
-    cv.wait(lock, []()
+    while (!isFinishing.load())
     {
-        return isFinishing.load();
-    });
+        std::unique_lock<decltype(mtx)> lock(mtx);
+        cv.wait(lock, [&]()
+        {
+            return isProvided.load() || isFinishing.load();
+        });
+        std::cout << "[CONSUMER] Fetched provider`s signal\n";
+        isProvided.store(false);
+    }
 
-    std::cout << "Consumer stopping\n";
+    std::cout << "[CONSUMER] Stopping...\n";
 }
 
 int main()
