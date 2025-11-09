@@ -39,7 +39,7 @@ void provider()
     cv.notify_all();
 }
 
-void consumer()
+void consumer(int id)
 {
     while (!isFinishing.load())
     {
@@ -48,11 +48,11 @@ void consumer()
         {
             return isProvided.load() || isFinishing.load();
         });
-        std::cout << "[CONSUMER] Fetched provider`s signal\n";
+        std::cout << "[CONSUMER" + std::to_string(id) + "] Fetched provider`s signal\n";
         isProvided.store(false);
     }
 
-    std::cout << "[CONSUMER] Stopping...\n";
+    std::cout << "[CONSUMER" + std::to_string(id) + "] Stopping...\n";
 }
 
 int main()
@@ -61,10 +61,14 @@ int main()
     signal(SIGINT, signalHandler);
 
     std::thread providerThread(provider);
-    std::thread consumerThread(consumer);
+
+    std::thread consumerThread1(consumer, 1);
+    std::thread consumerThread2(consumer, 2);
 
     providerThread.join();
-    consumerThread.join();
+
+    consumerThread1.join();
+    consumerThread2.join();
 
     std::cout << "Execution completed\n";
     return EXIT_SUCCESS;
