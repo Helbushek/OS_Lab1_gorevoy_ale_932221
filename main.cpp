@@ -4,6 +4,7 @@
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
+#include <csignal>
 
 #include "some_class.h"
 
@@ -13,11 +14,17 @@ std::mutex mtx;
 std::condition_variable cv;
 std::atomic<bool> isFinishing = false;
 
+void signalHandler(int signal)
+{
+    std::cout << "\b\b";
+    isFinishing = true;
+}
+
 void provider()
 {
     std::lock_guard<decltype(mtx)> lock(mtx);
     
-    while(!isFinishing)
+    while(!isFinishing.load())
     {
         std::cout << "Provider is waiting\n";
         std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -31,7 +38,7 @@ void consumer()
     std::unique_lock<std::mutex> lock(mtx);
     cv.wait(lock, []()
     {
-        return !isFinishing;
+        return isFinishing.load();
     });
 
     std::cout << "Consumer stopping\n";
@@ -39,6 +46,9 @@ void consumer()
 
 int main()
 {
+    signal(SIGTERM, signalHandler);
+    signal(SIGINT, signalHandler);
+
     std::thread providerThread(provider);
     std::thread consumerThread(consumer);
 
