@@ -7,6 +7,7 @@
 MyClass::MyClass()
     : string_(nullptr)
     , stringSize_(0)
+    , counter_(0)
 {}
 
 MyClass::MyClass(const std::string& name, size_t length)
