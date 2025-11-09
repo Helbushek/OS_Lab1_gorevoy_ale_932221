@@ -33,6 +33,7 @@ void provider()
         }
         cv.notify_all();
         std::this_thread::sleep_for(std::chrono::seconds(1));
+        someData.Count();
     }
 
     std::cout << "[PROVIDER] Stopping...\n";
@@ -48,7 +49,7 @@ void consumer(int id)
         {
             return isProvided.load() || isFinishing.load();
         });
-        std::cout << "[CONSUMER" + std::to_string(id) + "] Fetched provider`s signal\n";
+        std::cout << "[CONSUMER" + std::to_string(id) + "] Fetched provider`s signal: " + std::to_string(someData.GetCounter()) + "\n";
         isProvided.store(false);
     }
 
