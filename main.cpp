@@ -18,26 +18,27 @@ std::atomic<bool> isProvided = false;
 void signalHandler(int signal)
 {
     std::cout << "\b\bEXIT SIGNAL CAUGHT\n";
-    isFinishing = true;
+    isFinishing.store(true);
+    cv.notify_all();
 }
 
 void provider()
 {
     while (!isFinishing.load()) ///< Check for exit flag
     {
-        {
-            std::lock_guard<decltype(mtx)> lock(mtx); ///< Locking our mutex
+        std::unique_lock<decltype(mtx)> lock(mtx); ///< Locking our mutex
 
-            std::cout << "[PROVIDER] Is providing...\n"; 
-            someData->Count(); ///< Doing some job
-            isProvided.store(true); ///< Setting flag that the job is completed
-        } ///< Our mutex will be freed here 
+        std::cout << "[PROVIDER] Is providing...\n"; 
+        someData->Count(); ///< Doing some job
+        isProvided.store(true); ///< Setting flag that the job is completed
         cv.notify_one(); ///< Here we say to consumer that "Hey, you can receive my work result, i`ve finished"
-        std::this_thread::sleep_for(std::chrono::seconds(1)); ///< Sleeping, because tired idk
+        cv.wait_for(lock, std::chrono::seconds(1), []()
+        {
+            return isFinishing.load();
+        }); ///< Here we wait for one second, simulating work with ability to break the thread`s sleep with confitional variable
     }
 
     std::cout << "[PROVIDER] Stopping...\n"; ///< We will come here only if isFinished
-    cv.notify_all(); ///< We must call to all consumers that they must stop waiting
 }
 
 void consumer(int id)
@@ -55,7 +56,7 @@ void consumer(int id)
             break; ///< Check to exit if we get notification to exit and not to receive processed data
         }
 
-        std::cout << "[CONSUMER" + std::to_string(id) + "] Fetched provider`s signal: " + std::to_string(someData->GetCounter()) + "\n"; ///< Just logging our id and data
+        std::cout << "[CONSUMER" + std::to_string(id) + "] Fetched provider`s signal: " + someData->GetString() + std::to_string(someData->GetCounter()) + "\n"; ///< Just logging our id and data
         isProvided.store(false);
     }
 

@@ -5,8 +5,7 @@
 #include <limits>
 
 MyClass::MyClass()
-    : string_(nullptr)
-    , stringSize_(0)
+    : string_("Not initialized string, or something")
     , counter_(0)
 {}
 
@@ -17,24 +16,7 @@ MyClass::MyClass(const std::string& name, size_t length)
         throw std::logic_error("Name`s length must be equal to length");
     }
 
-    string_ = new char[length];
-
-    for (size_t i = 0; i < length; ++i)
-    {
-        if (name[i] == '\0')
-        {
-            return;
-        }
-        string_[i] = name[i];
-    }
-}
-
-MyClass::~MyClass()
-{
-    if (string_)
-    {
-        delete string_;
-    }
+    string_ = name;
 }
 
 bool MyClass::Count()
@@ -44,6 +26,8 @@ bool MyClass::Count()
         counter_ = 0;
         return false;
     }
+    string_ = (counter_ % 2 == 0 ? "A" : "B");
+
     ++counter_;
     return true;
 }
@@ -51,4 +35,9 @@ bool MyClass::Count()
 int MyClass::GetCounter()
 {
     return counter_;
+}
+
+std::string MyClass::GetString()
+{
+    return string_;
 }

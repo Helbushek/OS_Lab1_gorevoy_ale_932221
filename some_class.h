@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
+#include <string>
 
 class MyClass
 {
@@ -9,15 +9,16 @@ public:
     MyClass();
     MyClass(const std::string& name, size_t length);
 
-    ~MyClass();
+    ~MyClass() = default;
 
     bool Count();
 
     int GetCounter();
 
+    std::string GetString();
+
 private:
-    char* string_;
-    size_t stringSize_;
+    std::string string_;
 
     uint64_t counter_;
 };
