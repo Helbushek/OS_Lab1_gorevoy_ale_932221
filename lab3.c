@@ -10,8 +10,8 @@
 
 /* Дата гибели Титаника: 15 апреля 1912 года, 00:00 UTC */
 static const struct tm titanic_date = {
-    .tm_year = 1912 - 1900,
-    .tm_mon  = 4 - 1,
+    .tm_year = 1912,
+    .tm_mon  = 4,
     .tm_mday = 15,
     .tm_hour = 0,
     .tm_min  = 0,
@@ -26,8 +26,8 @@ static int tsulab_proc_show(struct seq_file *m, void *v)
     s64 days_diff;
 
     titanic_timestamp = mktime64(
-        titanic_date.tm_year + 1900,
-        titanic_date.tm_mon + 1,
+        titanic_date.tm_year,
+        titanic_date.tm_mon,
         titanic_date.tm_mday,
         titanic_date.tm_hour,
         titanic_date.tm_min,
