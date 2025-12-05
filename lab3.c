@@ -37,7 +37,7 @@ static int tsulab_proc_show(struct seq_file *m, void *v)
     ktime_get_real_ts64(&ts_now);
     now_timestamp = ts_now.tv_sec;
 
-    days_diff = div_s64(now_timestamp - titanic_timestamp, 86400LL);
+    days_diff = (now_timestamp - titanic_timestamp) / 86400LL;
 
     seq_printf(m, "Days since Titanic sank: %lld\n", days_diff);
 
